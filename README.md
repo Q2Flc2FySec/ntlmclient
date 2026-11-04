@@ -1,6 +1,6 @@
 # ntlmclient
 
-Minimaler NTLM-over-HTTP-Client.
+Minimal NTLM-over-HTTP client.
 
 ## Installation
 
@@ -8,13 +8,13 @@ Minimaler NTLM-over-HTTP-Client.
 uv tool install git+https://github.com/Q2Flc2FySec/ntlmclient.git
 ```
 
-Einmalig ausführen, ohne dauerhaft zu installieren:
+Run once without installing permanently:
 
 ```bash
 uvx --from git+https://github.com/Q2Flc2FySec/ntlmclient.git ntlmclient -u $USER -p $PASSWORD -d $DOMAIN
 ```
 
-## Verwendung
+## Usage
 
 ```bash
 ntlmclient -u $USER -p $PASSWORD -d $DOMAIN

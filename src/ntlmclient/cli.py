@@ -29,12 +29,12 @@ def read_http_response(sock: socket.socket) -> tuple:
             break
         data += chunk
     if not data:
-        raise ConnectionError("Verbindung wurde ohne Antwort geschlossen")
+        raise ConnectionError("Connection closed without a response")
     header_part = data.split(b'\r\n\r\n')[0].decode()
     lines = header_part.split('\r\n')
     status_line = lines[0].split(' ')
     if len(status_line) < 2 or not status_line[1].isdigit():
-        raise ConnectionError(f"Keine gueltige HTTP-Statuszeile erhalten: {lines[0]!r}")
+        raise ConnectionError(f"No valid HTTP status line received: {lines[0]!r}")
     status = int(status_line[1])
     headers = {}
     for line in lines[1:]:
@@ -45,24 +45,24 @@ def read_http_response(sock: socket.socket) -> tuple:
 
 def send_ntlm_request(username: str, password: str, domain: str, host: str, port: int, path: str):
     with contextlib.closing(socket.create_connection((host, port), timeout=10)) as sock:
-        # Schritt 1: Negotiate
+        # Step 1: Negotiate
         type1 = getNTLMSSPType1(workstation='', domain=domain)
         type1['flags'] &= ~0x00000030
         type1_b64 = base64.b64encode(type1.getData()).decode()
 
         sock.sendall(build_http_request(path, host, port, type1_b64))
 
-        # Schritt 2: Challenge lesen
+        # Step 2: Read the challenge
         status, headers = read_http_response(sock)
         log.debug(f"Challenge Status: {status}")
 
         www_auth = headers.get('www-authenticate', '')
         if not www_auth.startswith('NTLM '):
-            raise ValueError(f"Kein NTLM Challenge erhalten: {www_auth}")
+            raise ValueError(f"No NTLM challenge received: {www_auth}")
 
         type2_bytes = base64.b64decode(www_auth.split(' ', 1)[1].strip())
 
-        # Schritt 3: Authenticate
+        # Step 3: Authenticate
         type3, _ = getNTLMSSPType3(
             type1,
             type2_bytes,
@@ -81,7 +81,7 @@ def send_ntlm_request(username: str, password: str, domain: str, host: str, port
         print(f"Headers: {headers}")
 
 def main():
-    parser = argparse.ArgumentParser(description='NTLM Client ohne Signing')
+    parser = argparse.ArgumentParser(description='NTLM client without signing')
     parser.add_argument('-u', '--username', required=True)
     parser.add_argument('-p', '--password', required=True)
     parser.add_argument('-d', '--domain',   required=True)
@@ -89,7 +89,7 @@ def main():
     parser.add_argument(      '--port',     default=80, type=int)
     parser.add_argument(      '--path',     default='/')
     parser.add_argument('-v', '--verbose',  action='store_true',
-                        help='Debug-Logging aktivieren')
+                        help='enable debug logging')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)

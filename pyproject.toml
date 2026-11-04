@@ -1,7 +1,7 @@
 [project]
 name = "ntlmclient"
 version = "0.1.0"
-description = "NTLM-over-HTTP Authentication Client (ohne Signing)"
+description = "NTLM-over-HTTP authentication client (without signing)"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["impacket>=0.12"]
